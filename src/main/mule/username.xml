@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="641b6cb2-e94b-472a-820c-0ff1163816f8" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="usernameFlow" doc:id="21cdb85d-8a59-42ca-997c-bcf5c5526de6" >
+		<http:listener doc:name="Listener" doc:id="ab7f7731-aa5d-489c-9e5e-f8bf033190a2" config-ref="HTTP_Listener_config" path="/user"/>
+		<ee:transform doc:name="Transform Message" doc:id="b53dfce3-e126-45f2-8381-7aa7d2ee670c" >
+			<ee:message >
+				<ee:set-attributes ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-attributes>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="name" ><![CDATA[attributes.queryParams.name]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<choice doc:name="Choice" doc:id="a46f3a97-184f-4b24-810c-99ba5fe68d02" >
+			<when expression='#[vars.name == "mulesoft"]'>
+				<ee:transform doc:name="Transform Message" doc:id="f79f188d-89ee-4e1e-90d5-8d075196dd47" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+"welcome to muelsoft"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[vars.name == "bilvosoft"]'>
+				<ee:transform doc:name="Transform Message" doc:id="22f50408-787b-4986-a266-46a46da165c3">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+"welcome to bilvosoft"]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="Transform Message" doc:id="03258e83-b5b5-415f-9cea-847d8cabe882" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	message: "no data"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Logger" doc:id="f0008f5b-ce31-4c1c-b932-4427e9d192d6" message="#[payload]"/>
+	</flow>
+</mule>
